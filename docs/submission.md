@@ -27,6 +27,8 @@ See [architecture.md](architecture.md) for the architecture diagram and request 
 - **Ollama:** local `/api/chat` service returns structured JSON; output is validated before rendering.
 - **SQLite:** parameterized inserts/deletes store timestamp, sender, subject, score, category and findings; the full body is not persisted.
 
+Flask was selected over a larger framework because this single-user educational app needs a small local HTTP API, template/static-file serving, and straightforward SQLite integration without extra service infrastructure.
+
 ## Q3 — Ollama integration
 
 `GET /api/health` requests the Ollama tags endpoint with a short timeout and reports online/offline state, the configured model and whether it is installed. `POST /api/analyze` sends a JSON-only prompt to the configured local `/api/chat` URL with a configurable timeout. The response is checked for an allowed verdict, integer confidence in 0–100, string arrays for reasons/evidence/recommendations, and string uncertainty. Timeouts, connection failures and invalid output produce a useful advisory error while retaining rule-based results.
