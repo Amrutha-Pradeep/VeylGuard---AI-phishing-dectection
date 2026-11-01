@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#070c17">
+    <meta name="description" content="VeylGuard — a free, local AI-powered phishing email detection tool. Analyze suspicious emails using transparent security rules and a private local Ollama AI model. No data leaves your machine.">
+    <meta property="og:title" content="VeylGuard | Phishing Email Detection">
+    <meta property="og:description" content="Spot phishing emails instantly with local AI and transparent rule-based analysis. Your data never leaves your machine.">
+    <meta property="og:type" content="website">
+    <title>VeylGuard | Phishing Email Detection</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+</head>
+<body>
+    <div class="app-shell">
+
+        <!-- ── Top Navigation Bar ──────────────────────────────────────── -->
+        <header class="topbar">
+            <a class="brand" href="/" aria-label="VeylGuard home">
+                <span class="brand-mark" aria-hidden="true">V</span>
+                <span>VEYL<span class="brand-light">GUARD</span></span>
+            </a>
+            <div class="system-status">
+                <span class="status-dot" id="status-dot"></span>
+                <span id="ollama-status">Checking local AI…</span>
+            </div>
+        </header>
+
+        <main>
+
+            <!-- ── Hero ──────────────────────────────────────────────────── -->
+            <section class="hero">
+                <p class="eyebrow">LOCAL EMAIL SECURITY CONSOLE</p>
+                <h1>Spot the threat.<br><span class="hero-accent">Before you click.</span></h1>
+                <p class="hero-copy">
+                    Analyze suspicious emails with transparent security rules and a local
+                    AI assessment. Your email body is never saved — everything stays on your machine.
+                </p>
+                <div class="hero-tags" aria-label="Key features">
+                    <span><span class="tag-dot" aria-hidden="true"></span>7 detection rules</span>
+                    <span><span class="tag-dot" aria-hidden="true"></span>Local AI (Ollama)</span>
+                    <span><span class="tag-dot" aria-hidden="true"></span>Private — no cloud</span>
+                    <span><span class="tag-dot" aria-hidden="true"></span>Explainable scoring</span>
+                </div>
+            </section>
+
+            <!-- ── Input + Overview Grid ──────────────────────────────────── -->
+            <div class="main-grid">
+
+                <!-- Email Input -->
+                <section class="panel scan-panel">
+                    <div class="section-heading">
+                        <div>
+                            <p class="eyebrow">01 / EMAIL INPUT</p>
+                            <h2>Inspect an email</h2>
+                        </div>
+                        <span class="step-number" aria-hidden="true">01</span>
+                    </div>
+
+                    <form id="email-form" novalidate>
+                        <label for="sender">Sender email address</label>
+                        <input id="sender" name="sender" type="text" maxlength="254"
+                               placeholder='PayPal &lt;support@verify-now.net&gt; or user@domain.com'
+                               autocomplete="off" required>
+
+                        <label for="subject">Email subject</label>
+                        <input id="subject" name="subject" type="text" maxlength="300"
+                               placeholder="Your account requires immediate attention" required>
+
+                        <div class="label-row">
+                            <label for="body">Email body</label>
+                            <span id="char-count" aria-live="polite">0 / 20,000</span>
+                        </div>
+                        <textarea id="body" name="body" maxlength="20000" rows="9"
+                                  placeholder="Paste the full email text here…" required></textarea>
+
+                        <p class="privacy-note">
+                            <span aria-hidden="true">i</span>
+                            Use synthetic examples only. Avoid pasting real confidential information.
+                        </p>
+                        <p id="form-message" class="form-message" role="alert" aria-live="assertive"></p>
+                        <button class="button button-primary full-button" id="analyze-button" type="submit">
+                            <span id="btn-label">Analyze email</span>
+                            <span class="btn-spinner" id="btn-spinner" aria-hidden="true" hidden></span>
+                            <span aria-hidden="true" id="btn-arrow">↗</span>
+                        </button>
+                    </form>
+                </section>
+
+                <!-- How It Works -->
+                <section class="panel overview-panel">
+                    <div class="section-heading">
+                        <div>
+                            <p class="eyebrow">02 / DETECTION ENGINE</p>
+                            <h2>How VeylGuard works</h2>
+                        </div>
+                        <span class="step-number" aria-hidden="true">02</span>
+                    </div>
+                    <div class="feature-row">
+                        <div class="feature-icon" aria-hidden="true">⌁</div>
+                        <div>
+                            <h3>Rule-based checks</h3>
+                            <p>7 documented indicators: suspicious links, urgent wording, brand spoofing, generic greetings, attachment lures, and sensitive-info requests. Contributes up to <strong>60 pts</strong>.</p>
+                        </div>
+                        <span class="feature-state">ACTIVE</span>
+                    </div>
+                    <div class="feature-row">
+                        <div class="feature-icon" aria-hidden="true">✳</div>
+                        <div>
+                            <h3>Local AI assessment</h3>
+                            <p>Ollama (<code>qwen2.5:3b</code>) provides a second opinion — no email data leaves your machine. Contributes up to <strong>40 pts</strong> based on verdict × confidence.</p>
+                        </div>
+                        <span class="feature-state" id="ai-feature-state">CHECKING</span>
+                    </div>
+                    <div class="feature-row">
+                        <div class="feature-icon" aria-hidden="true">▤</div>
+                        <div>
+                            <h3>Combined risk score</h3>
+                            <p>Rules (max 60) + AI advisory (max 40) = 0–100. Categories: <span class="cat-chip cat-low">Low</span> <span class="cat-chip cat-medium">Medium</span> <span class="cat-chip cat-high">High</span> <span class="cat-chip cat-critical">Critical</span>.</p>
+                        </div>
+                        <span class="feature-state">READY</span>
+                    </div>
+                    <div class="notice-card">
+                        <span class="notice-icon" aria-hidden="true">!</span>
+                        <div>
+                            <strong>Advisory only</strong>
+                            <p>No automated scan can guarantee that an email is safe or malicious. Always verify suspicious requests through a trusted, independent channel.</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- ── Results Panel ─────────────────────────────────────────── -->
+            <section id="results" class="panel results-panel" hidden aria-live="polite" aria-label="Analysis results">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">03 / SCAN OUTPUT</p>
+                        <h2>Analysis summary</h2>
+                    </div>
+                    <span class="step-number" aria-hidden="true">03</span>
+                </div>
+
+                <!-- Score Ring + Category -->
+                <div class="score-layout">
+                    <div class="score-ring-wrap" role="img" aria-labelledby="ring-label">
+                        <svg class="score-ring" viewBox="0 0 120 120" aria-hidden="true">
+                            <circle class="ring-track" cx="60" cy="60" r="50"/>
+                            <circle class="ring-fill" id="ring-fill" cx="60" cy="60" r="50"
+                                    stroke-dasharray="314.16" stroke-dashoffset="314.16"/>
+                        </svg>
+                        <div class="ring-inner">
+                            <strong id="risk-score">0</strong>
+                            <span class="ring-denom">/ 100</span>
+                            <span class="ring-label" id="ring-label">RISK SCORE</span>
+                        </div>
+                    </div>
+                    <div class="score-description">
+                        <p class="eyebrow">COMBINED RISK (RULES + AI)</p>
+                        <h3 id="risk-category" class="risk-category">Not assessed</h3>
+                        <!-- Score breakdown pills -->
+                        <div class="score-pills" id="score-pills" hidden>
+                            <span class="pill pill-rule" id="pill-rule">Rule: 0/60</span>
+                            <span class="pill-sep">+</span>
+                            <span class="pill pill-ai" id="pill-ai">AI: 0/40</span>
+                            <span class="pill-sep">=</span>
+                            <span class="pill pill-total" id="pill-total">0/100</span>
+                        </div>
+                        <p id="analysis-notice" class="muted"></p>
+                    </div>
+                </div>
+
+                <!-- Findings + Breakdown columns -->
+                <div class="result-columns">
+                    <div class="result-block">
+                        <h3>Detected indicators</h3>
+                        <ul id="findings-list" class="result-list"></ul>
+                    </div>
+                    <div class="result-block">
+                        <h3>Risk point breakdown</h3>
+                        <ul id="breakdown-list" class="result-list"></ul>
+                    </div>
+                </div>
+
+                <!-- AI Assessment -->
+                <div class="ai-analysis">
+                    <div class="section-heading compact-heading">
+                        <div>
+                            <p class="eyebrow">LOCAL MODEL / OLLAMA</p>
+                            <h3>AI assessment</h3>
+                        </div>
+                        <span id="ai-verdict-badge" class="verdict-badge" aria-hidden="true"></span>
+                    </div>
+                    <div class="ai-meta">
+                        <p>Verdict <strong id="ai-verdict">Not assessed</strong></p>
+                        <p>Confidence <strong id="ai-confidence">—</strong></p>
+                    </div>
+                    <div class="result-columns" style="margin-top:14px">
+                        <div class="result-block">
+                            <h3>AI reasoning</h3>
+                            <ul id="ai-reasons" class="result-list"></ul>
+                        </div>
+                        <div class="result-block">
+                            <h3>Evidence snippets</h3>
+                            <ul id="ai-evidence" class="result-list"></ul>
+                        </div>
+                        <div class="result-block">
+                            <h3>Recommendations</h3>
+                            <ul id="ai-recommendations" class="result-list"></ul>
+                        </div>
+                    </div>
+                    <p class="muted" id="ai-uncertainty"></p>
+                </div>
+
+                <!-- Export / Download -->
+                <div class="export-bar" aria-label="Export this report">
+                    <p class="export-label">Export report</p>
+                    <div class="export-actions">
+                        <button class="button button-secondary" type="button" id="copy-report">
+                            <span>&#x2398;</span> Copy to clipboard
+                        </button>
+                        <button class="button button-secondary" type="button" id="download-json">
+                            &#x2913; Download JSON
+                        </button>
+                        <button class="button button-secondary" type="button" id="download-txt">
+                            &#x2913; Download .txt
+                        </button>
+                    </div>
+                    <p id="export-message" class="export-message" role="status" aria-live="polite"></p>
+                </div>
+            </section>
+
+            <!-- ── History Section ───────────────────────────────────────── -->
+            <section class="history-section" id="history-section" aria-labelledby="history-heading">
+                <div class="section-heading history-title">
+                    <div>
+                        <p class="eyebrow">04 / STORED LOCALLY</p>
+                        <h2 id="history-heading">Scan history</h2>
+                        <p class="muted">Your latest 100 analyses. The full email body is not stored.</p>
+                    </div>
+                    <div class="history-actions">
+                        <button class="button button-secondary" type="button" id="refresh-history">Refresh</button>
+                        <button class="button button-danger" type="button" id="clear-history">Clear all</button>
+                    </div>
+                </div>
+                <div class="history-controls">
+                    <input type="search" id="history-search"
+                           placeholder="Search sender or subject…"
+                           aria-label="Search scan history">
+                    <select id="history-filter" aria-label="Filter by risk category">
+                        <option value="all">All risk levels</option>
+                        <option value="Critical">Critical</option>
+                        <option value="High">High</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Low">Low</option>
+                    </select>
+                </div>
+                <p id="history-message" class="muted" role="status" aria-live="polite">Loading history…</p>
+                <div id="history-list" class="history-list"></div>
+            </section>
+        </main>
+
+        <footer>
+            <span>VEYL<span class="brand-light">GUARD</span></span>
+            <span>Educational prototype · Local analysis · Use human judgment</span>
+        </footer>
+    </div>
+</body>
+</html>
